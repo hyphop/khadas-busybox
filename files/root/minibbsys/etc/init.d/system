@@ -1,0 +1,25 @@
+#!/bin/sh
+
+## hyphop ##
+
+# echo "[i] $0">&2
+
+[ -f /etc/hostname ] && \
+    cat /etc/hostname > /proc/sys/kernel/hostname
+
+[ "$hostname" ] && \
+    echo "$hostname" > /proc/sys/kernel/hostname
+
+
+syslogip="$(cat /tmp/net/eth0/syslogip)"
+
+[ "$syslogip" ] || syslogip="$(cat /tmp/net/eth0/gw)"
+[ "$syslogip" ] || syslogip="192.168.168.168"
+
+/sbin/syslogd -R $syslogip -L -C -K -O /var/log/messages
+
+logger -t sys "system starting"
+
+# apply timezone to kernel
+
+#date -k

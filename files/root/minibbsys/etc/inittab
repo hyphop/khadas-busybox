@@ -1,0 +1,28 @@
+::sysinit:/etc/init.d/rcS S boot
+::shutdown:/etc/init.d/rcS K shutdown
+
+#tts/0::askfirst:/usr/libexec/login.sh
+
+# block this lines for multyplex usage 
+
+#tty1::respawn:/bin/login
+
+tty1::respawn:/bin/login -f root
+
+#tty1::askfirst:/bin/login
+
+#tty1::respawn:/opt/mlogin
+#tty1::askfirst:/opt/mlogin
+
+ttyS0::respawn:/bin/login -f root
+
+#ttyS0::respawn:/bin/login
+#ttyS0::askfirst:/bin/login
+
+## multiplex input output
+#ttyS0::respawn:/opt/mlogin
+#ttyS0::askfirst:/opt/mlogin
+#ttyS0::askfirst:/opt/mlogin tty1 ttyS0
+
+## redirect console
+#ttyS0::askfirst:/bin/conspy

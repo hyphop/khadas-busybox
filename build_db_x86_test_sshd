@@ -1,0 +1,9 @@
+#!/bin/sh
+
+## hyphop ##
+
+echo "[i] build local tests sshd ">&2
+
+TEST=x86 ${0%_x86_test}
+
+files/dropbear-files/sshd_test

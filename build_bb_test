@@ -1,0 +1,27 @@
+#!/bin/sh
+
+## hyphop ##
+
+## busybox cross compilation test host
+
+## USAGE EXAMPLES
+##
+## 	./build menuconfig 
+##	./build -j16
+## 	./build install
+##      ./build 
+
+## config 
+
+. "$(dirname $0)/,config"
+#. "$(dirname $0)/,config.make"
+
+## check gcc 
+[ -d $BDIR.test ] || {
+    cp -a $WDIR/$PKGD $BDIR.test
+}
+
+#BDIR=${BDIR}.test
+
+make -C $BDIR.test "$@"
+

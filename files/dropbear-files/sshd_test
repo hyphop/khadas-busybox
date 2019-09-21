@@ -1,0 +1,18 @@
+#!/bin/sh
+
+## hyphop ##
+
+## ssh test local
+
+cd $(dirname $0)
+
+DBD=../../../khadas-busybox-wdir/dropbear/
+
+sudo=sudo
+
+$DBD/dropbearmulti dropbearkey -t rsa -f /tmp/rsa.key
+$DBD/dropbearmulti dropbearkey -t ecdsa -f /tmp/ecdsa.key
+
+$sudo $DBD/dropbearmulti dropbear -r /tmp/ecdsa.key -r /tmp/rsa.key -EFB -p 2222
+
+

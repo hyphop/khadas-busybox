@@ -1,0 +1,65 @@
+#!/bin/sh
+
+## hyphop ##
+
+. "$(dirname $0)/,config"
+. "$(dirname $0)/,config.make"
+
+
+[ -p "$WDIR" ] || mkdir -p $WDIR
+[ -p "$LOG" ] || mkdir -p $LOG
+
+echo "[i] current dir $CDIR, working dir $WDIR">&2
+
+#cd $WDIR
+
+## download source 
+
+[ -s "$WDIR/$PKG" ] || {
+    echo "[i] get source $SRC => $WDIR/$PKG">&2
+    curl -jkL "$SRC" -C- -o "$WDIR/$PKG"
+}
+
+## unpack 
+
+[ -d "$WDIR/$PKGD" ] || {
+    echo "[i] unpack $PKG => $NAME-$VER => $NAME">&2
+    tar -C "$WDIR" -xf "$WDIR/$PKG"
+    ln -s $NAME-$VER "$WDIR/$NAME"
+}
+
+
+[ -f "$WDIR/$NAME/.config" ] || {
+    echo "[i] copy default configs and files">&2
+    cp $CDIR/files/$NAME/.config $WDIR/$NAME/.config
+}
+
+[ -L $STAGING_DIR ] || {
+    cd $ZDIR
+    ls -l1
+#    echo "[i] download tc => $squash_tc_name">&2
+#    curl -jkL "$squash_tc_link" -C- -o "$squash_tc_name"
+
+#    [ -d $tc_gcc_dir ] || {
+#	echo "[i] unpack $squash_tc_name">&2
+#	unsquashfs -d "$tc_gcc_dir" $squash_tc_name && {
+#	    ln -s $tc_gcc_dir tc
+#	}
+#    }
+
+}
+
+## check gcc 
+exit 0
+
+${CROSS_COMPILE}gcc --version 2>/dev/null 1>/dev/null || {
+    echo "[e] tc broken">&2
+
+    ${CROSS_COMPILE}gcc --version
+
+    exit 1
+}
+
+echo "[i] OK - we are ready! next step is ./build">&2
+
+

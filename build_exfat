@@ -1,0 +1,45 @@
+#!/bin/sh
+
+## hyphop ##
+
+## config 
+
+. "$(dirname $0)/,config"
+. "$(dirname $0)/,config.make"
+
+
+CDIR=$PWD
+
+## fix -
+export CROSS_COMPILE=${CROSS_COMPILE%-}
+
+cd $BDIR/../exfat
+
+## check gcc
+
+${CROSS_COMPILE}-gcc --version || {
+    echo "[e] tc broken">&2
+    exit 1
+}
+
+[ "$1" ] || {
+
+autoreconf --install
+
+./configure \
+    --host=$CROSS_COMPILE
+
+}
+
+make "$@" || {
+    echo "[e] make failed">&2
+    exit 1
+}
+
+## copy files 
+
+${CROSS_COMPILE}-strip fsck/exfatfsck
+${CROSS_COMPILE}-strip mkfs/mkexfatfs
+${CROSS_COMPILE}-strip label/exfatlabel
+
+ls -l1 $CDIR/files/bin

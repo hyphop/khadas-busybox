@@ -1,0 +1,7 @@
+#!/bin/sh
+
+## hyphop ##
+
+echo "[i] build local tests ssh client ">&2
+
+files/dropbear-files/ssh_test

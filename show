@@ -1,0 +1,16 @@
+#!/bin/sh
+
+## hyphop ##
+
+. "$(dirname $0)/,config"
+
+INITRAMFS_DIR="$WDIR/initramfs"
+
+echo "[i] display info about packed initramfs / rootfs">&2
+
+cd $WDIR
+
+for S in *.cpio.* *.squashfs; do
+    printf "* %-26s %10s\n" $S "$(stat -c%s $S)"
+done
+

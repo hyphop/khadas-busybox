@@ -1,0 +1,31 @@
+#!/bin/sh
+
+## hyphop ##
+
+## prepare and pack initramfs as squashfs
+
+. "$(dirname $0)/,config"
+
+#[ "$COMP" ] || COMP="gzip"
+[ "$COMP" ] || COMP="xz"
+
+ROOTFS_IMAGE="$INITRAMFS_DIR.$COMP.squashfs"
+
+echo "[i] squashfs $COMP pack => $ROOTFS_IMAGE">&2
+
+[ -f "$ROOTFS_IMAGE" ] && {
+    echo "[w] exist $ROOTFS_IMAGE already">&2
+    rm $ROOTFS_IMAGE
+#   exit 1
+}
+
+## some triks for size
+[ "$CMP_BLOCK_SIZE" ] || CMP_BLOCK_SIZE=512k
+[ "$COMP" = "xz" ] && CMP_OPTS="-Xdict-size $CMP_BLOCK_SIZE -Xbcj arm"
+
+mksquashfs \
+    "$INITRAMFS_DIR" \
+    $ROOTFS_IMAGE \
+    -all-root \
+    -b $CMP_BLOCK_SIZE \
+    -comp $COMP $CMP_OPTS

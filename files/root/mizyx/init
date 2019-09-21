@@ -1,0 +1,49 @@
+#!/bin/sh
+
+## hyphop ##
+
+export PATH=/sbin:/usr/sbin:/bin:/usr/bin
+
+dmesg -n 1
+
+clear
+
+cat /init.splash
+
+ECHO(){
+    echo "[init] $@"
+}
+
+
+ECHO start
+
+[ -d /dev ] || mkdir -m 0755 /dev
+[ -d /root ] || mkdir -m 0700 /root
+[ -d /sys ] || mkdir /sys
+[ -d /run ] || mkdir /run
+[ -d /proc ] || mkdir /proc
+[ -d /tmp ] || mkdir /tmp
+
+mkdir -p /var/lock
+mount -t sysfs -o nodev,noexec,nosuid sysfs /sys
+mount -t proc -o nodev,noexec,nosuid proc /proc
+
+# Note that this only becomes /dev on the real filesystem if udev's scripts
+# are used; which they will be, but it's worth pointing out
+mount -t devtmpfs -o nosuid,mode=0755 udev /dev
+mkdir /dev/pts
+mount -t devpts -o noexec,nosuid,gid=5,mode=0620 devpts /dev/pts || true
+mount -t tmpfs -o "noexec,nosuid,size=10%,mode=0755" tmpfs /run
+mount -t tmpfs -o "noexec,nosuid,size=10%,mode=0755" tmpfs /tmp
+
+#mkdir -m 0755 /run/initramfs
+
+exec /sbin/init
+
+#/sbin/init
+
+while [ "1" ]; do
+    ECHO "ooops RETURN to init run sh again"
+    exec sh
+    sleep 1
+done

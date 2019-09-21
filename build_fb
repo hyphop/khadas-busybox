@@ -1,0 +1,29 @@
+#!/bin/sh
+
+## hyphop ##
+
+## busybox cross compilation 
+
+## USAGE EXAMPLES
+##
+## 	./build menuconfig 
+##	./build -j16
+## 	./build install
+##      ./build 
+
+## config 
+
+. "$(dirname $0)/,config"
+. "$(dirname $0)/,config.make"
+
+## check gcc 
+
+export CROSS_COMPILE=${CROSS_COMPILE%-}-
+
+${CROSS_COMPILE}gcc --version || {
+    echo "[e] tc broken // ${CROSS_COMPILE}">&2
+        exit 1
+}
+
+${CROSS_COMPILE}gcc fbtest.c
+

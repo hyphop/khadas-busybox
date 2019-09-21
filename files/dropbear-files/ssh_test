@@ -1,0 +1,14 @@
+#!/bin/sh
+
+## hyphop ##
+
+## ssh test local
+
+cd $(dirname $0)
+
+IP=localhost
+CONF=ssh.conf
+
+ssh -v -p 2222 -F $CONF $IP echo test && echo "OK!"
+
+#cat $CONF

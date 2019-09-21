@@ -1,0 +1,11 @@
+#!/bin/sh
+
+## hyphop ##
+
+#echo "[i] $0">&2
+
+	# process user commands
+	[ -f /etc/rc.local ] && {
+		( sh /etc/rc.local )&
+	}
+

@@ -1,0 +1,111 @@
+#!/bin/sh
+
+## hyphop ##
+
+## busybox cross compilation 
+
+## USAGE EXAMPLES
+##
+## 	./build menuconfig 
+##	./build -j16
+## 	./build install
+##      ./build 
+
+## config 
+
+. "$(dirname $0)/,config"
+. "$(dirname $0)/,config.make"
+
+## check gcc 
+
+${CROSS_COMPILE}gcc --version || {
+    echo "[e] tc broken // ${CROSS_COMPILE}">&2
+        exit 1
+}
+
+## fix -
+export CROSS_COMPILE=${CROSS_COMPILE%-}
+
+
+CDIR=$PWD
+
+cd $BDIR/..
+
+rm -r $DB_PK || exit 1
+
+tar -xf $DB_PKG
+
+[ -L dropbear ] || \
+    ln -s $DB_PK dropbear
+
+cd dropbear
+
+
+## some patches
+[ -f .patched ] || {
+    for p in $CDIR/files/dropbear-patch/*.patch; do
+	[ -f "$p" ] && {
+	echo "[i] patch $p">&2
+	patch -p1 < $p
+    }
+    done
+    echo $(date) > .patched
+}
+
+#export CFLAGS="-Os -ffunction-sections -fdata-sections"
+#export LDFLAGS="-Wl,--gc-sections "
+
+#export CROSS_COMPILE=aarch64-linux-gnu
+
+#echo ${CROSS_COMPILE}
+#export GCC=${CROSS_COMPILE}gcc
+#export CC=${CROSS_COMPILE}gcc
+
+#$GCC
+
+#exit 
+#export CFLAGS=" -DARGTYPE=3 -ffunction-sections -fdata-sections -flto"
+#export LDFLAGS=" -Wl,--gc-sections -flto=jobserver"
+
+#ADD="--enable-static"
+
+[ "$TEST" ] || \
+    ADD="$ADD --host=$CROSS_COMPILE"
+
+[ "1" ] && \
+./configure $ADD \
+    --prefix=/tmp/arm \
+    --disable-zlib \
+    --disable-pam \
+    --enable-openpty \
+    --enable-syslog \
+    --disable-lastlog \
+    --disable-utmpx \
+    --disable-utmp \
+    --disable-wtmp \
+    --disable-wtmpx \
+    --disable-loginfunc \
+    --disable-pututline \
+    --disable-pututxline \
+    --enable-bundled-libtom \
+    "$@"
+
+
+## REDIFINE maybe not needed 
+
+[ "" ] && \
+echo "
+#define DROPBEAR_ECDSA 1
+#define DROPBEAR_ECDH 1
+#define DROPBEAR_ECC_384 1
+#define DROPBEAR_ECC_521 1
+" > localoptions.h
+
+#make -j16 "$@"
+
+#$(TARGET_CONFIGURE_OPTS) \
+
+#make \
+make -j16 \
+	PROGRAMS="dropbear dbclient dropbearkey scp dropbearconvert" \
+	MULTI=1 SCPPROGRESS=1

@@ -1,0 +1,41 @@
+#!/bin/sh
+
+## hyphop ##
+
+## prepare and pack initramfs as squashfs
+
+
+. "$(dirname $0)/,config"
+
+CMD(){
+    echo "#! $@">&2
+    "$@"
+}
+
+cd $WDIR
+
+for ROOTFS_IMAGE in initramfs.bb.*.squashfs initrd.bb.cpio.* ; do
+
+echo $ROOTFS_IMAGE
+
+#continue
+
+[ -f "$ROOTFS_IMAGE" ] || {
+    echo "[w] not find $ROOTFS_IMAGE ">&2
+    continue
+}
+
+ROOTFS_UIMAGE="$(dirname $ROOTFS_IMAGE)/u$(basename $ROOTFS_IMAGE)"
+
+CMD mkimage -A arm64 \
+    -O linux \
+    -T ramdisk \
+    -C none \
+    -a 0x00000000 \
+    -e 0x00000000 \
+    -n uInitrd \
+    -d $ROOTFS_IMAGE \
+    $ROOTFS_UIMAGE
+
+done
+

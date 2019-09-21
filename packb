@@ -1,0 +1,20 @@
+#!/bin/sh
+
+## hyphop ##
+
+## prepare and pack initramfs as cpio lzma
+
+. "$(dirname $0)/,config"
+
+# !!! lzma only
+COMP=lzma
+
+INITRAMFS_DIR="$WDIR/initramfs.bb"
+
+ROOTFS_IMAGE="initrd.bb.cpio.$COMP"
+
+cd $INITRAMFS_DIR
+
+echo "[i] cpio lzma pack $INITRAMFS_DIR > $ROOTFS_IMAGE">&2
+
+find . 2>/dev/null | cpio -o --owner root:root -H newc | xz -9 --format=$COMP > ../$ROOTFS_IMAGE

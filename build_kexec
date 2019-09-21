@@ -1,0 +1,46 @@
+#!/bin/sh
+
+## hyphop ##
+
+## config 
+
+. "$(dirname $0)/,config"
+. "$(dirname $0)/,config.make"
+
+
+CDIR=$PWD
+
+## fix -
+export CROSS_COMPILE=${CROSS_COMPILE%-}
+
+cd $BDIR/../kexec-tools
+
+## check gcc
+
+${CROSS_COMPILE}-gcc --version || {
+    echo "[e] tc broken">&2
+    exit 1
+}
+
+[ "$1" ] || {
+
+make clean
+./bootstrap
+./configure \
+    --host=$CROSS_COMPILE \
+    --without-xen
+}
+
+#--without-zlib --without-lzma
+
+make "$@" || {
+    echo "[e] make failed">&2
+    exit 1
+}
+
+## copy files 
+
+${CROSS_COMPILE}-strip build/sbin/kexec
+rsync -a build/sbin/kexec $CDIR/files/bin
+
+ls -l1 $CDIR/files/bin

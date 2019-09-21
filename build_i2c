@@ -1,0 +1,25 @@
+#!/bin/sh
+
+## hyphop ##
+
+## config 
+
+. "$(dirname $0)/,config"
+. "$(dirname $0)/,config.make"
+
+
+CDIR=$PWD
+
+## fix -
+export CROSS_COMPILE=${CROSS_COMPILE%-}
+
+cd $BDIR/../i2c
+
+## check gcc
+
+${CROSS_COMPILE}-gcc --version || {
+    echo "[e] tc broken">&2
+    exit 1
+}
+
+./i2c_make

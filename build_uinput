@@ -1,0 +1,37 @@
+#!/bin/sh
+
+## hyphop ##
+
+## config 
+
+. "$(dirname $0)/,config"
+. "$(dirname $0)/,config.make"
+
+
+CDIR=$PWD
+
+## fix -
+export CROSS_COMPILE=${CROSS_COMPILE%-}
+
+cd $BDIR/../uinput
+
+## check gcc
+
+${CROSS_COMPILE}-gcc --version || {
+    echo "[e] tc broken">&2
+    exit 1
+}
+
+rm uinput
+
+export GCC=${CROSS_COMPILE}-gcc
+
+make "$@" || {
+    echo "[e] make failed">&2
+    exit 1
+}
+
+
+${CROSS_COMPILE}-strip uinput
+
+ls -l1 $CDIR/files/bin

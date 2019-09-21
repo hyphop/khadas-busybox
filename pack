@@ -1,0 +1,90 @@
+#!/bin/sh
+
+## hyphop ##
+
+## prepare and pack initramfs
+
+## USAGE EXAMPLE 
+##	COMP=lzma ./pack
+##	COMP=gzip BASE=mizyx ./pack
+
+. "$(dirname $0)/,config"
+. "$(dirname $0)/,config.make"
+
+[ "$BASE" ] || BASE="$1"
+[ "$BASE" ] || BASE="minibbsys"
+
+[ -d "$INITRAMFS_DIR" ] || mkdir -p "$INITRAMFS_DIR"
+
+ROOTFS_IMAGE="$INITRAMFS_DIR.$COMP.squashfs"
+
+[ -f "$ROOTFS_IMAGE" ] && {
+    echo "[w] exist $ROOTFS_IMAGE already">&2
+    rm $ROOTFS_IMAGE
+#    exit 1
+}
+
+[ -d $WDIR/busybox/_install ] || {
+    ./build_bb install
+}
+
+cp -a $WDIR/busybox/_install/* "$INITRAMFS_DIR"
+
+echo "[i] copy '$BASE' sys file">&2
+
+cp -a files/root/$BASE/* "$INITRAMFS_DIR"
+
+P=$PWD
+
+cd $INITRAMFS_DIR
+mkdir -p  bin dev lib etc proc sys sbin usr/bin usr/bin var run tmp root
+cd $P
+
+## libc strip and copy
+
+T1=/tmp/khadas.bb.lib
+
+[ -d $T1 ] || mkdir -p $T1
+
+T2=$INITRAMFS_DIR/lib
+
+[ -d $T2 ] || \
+    mkdir -p $T2
+
+cd $STAGING_DIR/$LIBC
+cp -a ld* libc* libm.* libm-* libres* libuti* $T1
+cd $P
+
+for f in $T1/*; do
+    echo $f
+    ${CROSS_COMPILE}strip $f
+done
+
+rsync -a $T1/* $T2
+
+# exit 0
+
+cp -a $WDIR/dropbear/dropbearmulti "$INITRAMFS_DIR/usr/sbin/dropbear" || exit 1
+cp -a $WDIR/kexec-tools/build/sbin/kexec "$INITRAMFS_DIR/sbin/kexec" || exit 1
+
+for f in "$INITRAMFS_DIR/usr/sbin/dropbear" \
+    "$INITRAMFS_DIR/sbin/kexec"; do
+    echo "$(ls -l1 $f)"
+    ${CROSS_COMPILE}strip $f
+    echo "$(ls -l1 $f)"
+done
+
+#exit 0
+
+echo "builded: $(date)" >> "$INITRAMFS_DIR/init.splash"
+echo "date: $(date)" > "$INITRAMFS_DIR/build"
+
+#sudo chown -R root:root "$INITRAMFS_DIR"
+# squash
+./packa "$1"
+# cpio 
+./packb "$1"
+# mkimage
+./packc "$1"
+
+

@@ -1,0 +1,40 @@
+#!/bin/sh
+
+## hyphop ##
+
+## alternative init
+
+echo "BUSYBOX INIT $0 - $@"
+
+rlevel=$1
+action=$2
+#init started: BusyBox v1.24.2 ()
+#BUSYBOX INIT /etc/init.d/rcS - S boot
+
+#env
+#cat /proc/mounts 
+
+D=$(dirname $0)
+
+[ "$action" = "boot" ] && {
+
+#mount -t proc none /proc 
+#mount -t devtmpfs dev /dev 
+#mount -t sysfs none /sys 
+#mount -t tmpfs none /tmp 
+#mount -t devpts -o noexec,nosuid,gid=5,mode=0620 devpts /dev/pts
+
+$D/boot
+$D/net
+$D/system
+($D/sshd 1>/tmp/ssh_log 2>&1 )&
+$D/done
+
+exit 0
+
+}
+
+## shutdown
+
+uptime
+

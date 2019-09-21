@@ -1,0 +1,72 @@
+#!/bin/sh
+
+## hyphop ##
+
+export PATH=/sbin:/usr/sbin:/bin:/usr/bin
+
+dmesg -n 1
+
+clear
+
+cat /init.splash
+
+ECHO(){
+    echo "[init] $@"
+}
+
+
+ECHO start // $hostname
+
+
+[ -d /dev ] || mkdir -m 0755 /dev
+[ -d /root ] || mkdir -m 0700 /root
+[ -d /sys ] || mkdir /sys
+[ -d /run ] || mkdir /run
+[ -d /proc ] || mkdir /proc
+[ -d /tmp ] || mkdir /tmp
+
+
+mount -t sysfs -o nodev,noexec,nosuid sysfs /sys
+mount -t proc -o nodev,noexec,nosuid proc /proc
+
+mount -t tmpfs -o "noexec,nosuid,size=10%,mode=0755" tmpfs /var
+mkdir -p /var/lock
+
+mount -t tmpfs -o "size=40%" tmpfs /tmp
+mount -t tmpfs -o "noexec,nosuid,size=5%,mode=0755" tmpfs /run
+
+# Note that this only becomes /dev on the real filesystem if udev's scripts
+# are used; which they will be, but it's worth pointing out
+grep -q devtmp /proc/mounts || \
+    mount -t devtmpfs -o nosuid,mode=0755 udev /dev
+mkdir /dev/pts
+mount -t devpts -o noexec,nosuid,gid=5,mode=0620 devpts /dev/pts || true
+
+[ "$hostname" ] || {
+
+    echo "$hostname" > /proc/sys/kernel/hostname
+    echo "$hostname" > /tmp/hostname
+
+}
+
+## prepare net config for system
+
+echo "[i] prev dhcp ip $ipaddr gw $gw">&2
+mkdir -p /tmp/net/eth0
+echo "$ipaddr" > /tmp/net/eth0/ip
+echo "$gw" > /tmp/net/eth0/gw
+echo "$syslogip" > /tmp/net/eth0/syslogip
+
+#mkdir -m 0755 /run/initramfs
+
+cat /init.splash > /dev/tty1
+
+exec /sbin/init
+
+#/sbin/init
+
+while [ "1" ]; do
+    ECHO "ooops RETURN to init run sh again"
+    exec sh
+    sleep 1
+done

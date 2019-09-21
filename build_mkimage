@@ -1,0 +1,43 @@
+#!/bin/sh
+
+## hyphop ##
+
+## config 
+
+. "$(dirname $0)/,config"
+. "$(dirname $0)/,config.make"
+
+
+CDIR=$PWD
+
+## fix -
+export CROSS_COMPILE="${CROSS_COMPILE%-}-"
+
+cd $BDIR/../u-boot
+
+## check gcc
+
+#${CROSS_COMPILE}-gcc --version || {
+#    echo "[e] tc broken">&2
+#    exit 1
+#}
+
+#make clean
+
+rm tools/mkimage
+
+make	\
+	HOSTCFLAGS="" \
+	HOSTLDFLAGS="" \
+	CROSS_BUILD_TOOLS=y \
+	no-dot-config-targets=tools-only \
+	envtools \
+	tools-only
+
+ls -l1 tools/mkimage
+${CROSS_COMPILE}strip tools/mkimage
+ls -l1 tools/mkimage
+
+#rsync -a build/sbin/kexec $CDIR/files/bin
+
+#ls -l1 $CDIR/files/bin

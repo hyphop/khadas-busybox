@@ -1,0 +1,5 @@
+#!/bin/sh
+
+## hyphop ##
+
+echo "[i] $0">&2

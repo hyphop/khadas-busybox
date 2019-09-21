@@ -1,0 +1,31 @@
+#!/bin/sh
+
+## mod hyphop ## 
+
+[ -f /etc/banner ] && cat /etc/banner
+
+export PATH="/usr/sbin:/usr/bin:/sbin:/bin"
+#~ export HOME=$(grep -e "^${USER:-root}:" /etc/passwd | cut -d ":" -f 6)
+export HOME=${HOME:-/root}
+export PS1='\u@\H:\w\$ '
+
+export PATH=/tmp/opt:/tmp/bin:/tmp/sbin:/tmp/usr/bin:/opt:/usr/sbin:/usr/bin:/sbin:/bin
+
+#alias bash='/bin/sh'
+#alias /bin/bash='/bin/sh'
+
+alias showfd='ls -l1 /proc/$$/fd'
+alias reboot_f='echo 1 > /proc/sys/kernel/sysrq; echo b > /proc/sysrq-trigger'
+
+[ -x /bin/more ] || alias more=less
+[ -x /usr/bin/vim ] && alias vi=vim || alias vim=vi
+[ -x /usr/bin/arp ] || arp() { cat /proc/net/arp; }
+[ -x /usr/bin/ldd ] || ldd() { LD_TRACE_LOADED_OBJECTS=1 $*; }
+
+[ -n "$FAILSAFE" ] || {
+	for FILE in /etc/profile.d/*.sh; do
+#		echo $FILE
+		[ -e "$FILE" ] && . "$FILE"
+	done
+	unset FILE
+}

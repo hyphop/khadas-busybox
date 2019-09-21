@@ -1,0 +1,28 @@
+#!/bin/sh
+
+## hyphop ##
+
+## local init script 
+
+#####################
+export PATH=/tmp/opt:/opt:/usr/sbin:/usr/bin:/sbin:/bin
+
+##
+# ADD THERE
+##
+
+echo "[i] rc.local">&2
+
+for s in /etc/rc.local.d/*.sh; do
+    echo "[i] run $s" >&2
+    [ -s $s ] && \
+	sh $s
+done
+
+##
+# ADD THERE
+##
+
+exit 0
+
+

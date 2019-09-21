@@ -1,0 +1,55 @@
+#!/bin/sh
+
+## hyphop ##
+
+#echo "[i] $0">&2
+
+DEV=eth0
+
+ifconfig $DEV up
+
+ip="$(cat /tmp/net/$DEV/ip)"
+gw="$(cat /tmp/net/$DEV/gw)"
+
+## ip config by manual
+
+ifconfig lo 127.0.0.1
+
+[ "$ip" ] && {
+    echo "[i] net setup from /proc/cmdline ipaddr=$ip gw=$gw">&2
+
+    ifconfig $DEV $ip
+#    ifconfig $DEV
+
+    route add default gw $gw
+#    route
+
+    IP=
+
+    for i in 1 2 3 4 5 6; do
+	ping -c1 -W1 $gw 1>/dev/null 2>/dev/null && {
+	    echo "[i] net connection ok">&2
+	    IP=$ip
+	    break
+	}
+
+    done
+
+    [ "$IP" ] || {
+	echo "[w] gw ping fail">&2
+	# try dhcp
+	ip=
+    }
+    
+}
+
+[ "$ip" ] || {
+    echo "[i] net dhcp setup">&2
+    udhcpc -i $DEV >/var/log/udhcpc.log 2>&1 &
+}
+
+telnetd
+
+# apply timezone to kernel
+
+#date -k
